@@ -1,0 +1,17 @@
+version: "3"
+
+tasks:
+  go:build:
+    desc: "Build the go binary"
+    cmd: go build -o bin/main ./cmd/...
+  go:run:
+    desc: "Run the go binary"
+    deps:
+      - go:build
+    cmd: ./bin/main {{.CLI_ARGS}}
+  go:test:
+    desc: "Run tests"
+    cmd: go test -v ./...
+  go:lint:
+    desc: Lint go code
+    cmd: golangci-lint run
