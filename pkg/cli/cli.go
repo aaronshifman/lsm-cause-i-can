@@ -24,11 +24,17 @@ type interaction struct {
 	input     string
 }
 
+// LSM represents the GET/PUT components of the LSM interface
+type LSM interface {
+	Get(key string) (string, bool)
+	Put(key string, val string)
+}
+
 // Cli contains the cli application
 type Cli struct {
-	// memCache is the in-memory cache of the LSM tree
+	// MemCache is the in-memory cache of the LSM tree
 	// for the CLI its a map of string:string
-	memCache *lsm.MemoryCache[string, string]
+	MemCache LSM
 }
 
 // Parse converts the raw sting into an operation and an argument
@@ -81,7 +87,7 @@ func (c *Cli) executeGet(input string) (string, error) {
 		return "", errors.New("GET requires a key")
 	}
 
-	val, ok := c.memCache.Get(input)
+	val, ok := c.MemCache.Get(input)
 	if !ok {
 		return "", fmt.Errorf("key not found: %s", input)
 	}
@@ -95,7 +101,7 @@ func (c *Cli) executePut(input string) (string, error) {
 		return "", errors.New("PUT requires a key and value")
 	}
 
-	c.memCache.Put(parts[0], parts[1])
+	c.MemCache.Put(parts[0], parts[1])
 
 	return "OK", nil
 }
@@ -104,6 +110,6 @@ func (c *Cli) executePut(input string) (string, error) {
 func NewCli() *Cli {
 	memCache := lsm.NewMemoryCache[string, string]()
 	return &Cli{
-		memCache: memCache,
+		MemCache: memCache,
 	}
 }
